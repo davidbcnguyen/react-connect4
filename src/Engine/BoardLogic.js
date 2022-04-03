@@ -3,18 +3,22 @@ export default class BoardLogic {
     #width;
     #winCond;
     #matrix;
-    #isOver;
+    #winningCord;
 
     constructor(height, width, winCond) {
         this.#height = height;
         this.#width = width;
         this.#winCond = winCond;
         this.#matrix = BoardLogic.emptyBoard(height, width);
-        this.#isOver = false;
+        this.#winningCord = [];
+    }
+
+    get winningCord() {
+        return this.#winningCord;
     }
 
     get isOver() {
-        return this.#isOver;
+        return this.#winningCord.length >= this.#winCond;
     }
 
     static emptyBoard(height, width) {
@@ -47,7 +51,7 @@ export default class BoardLogic {
     }
 
     move(symbol, column) {
-        if (this.#isOver) {
+        if (this.isOver) {
             return false;
         }
         if (column < 0 || this.#width <= column) {
@@ -62,52 +66,62 @@ export default class BoardLogic {
         }
         this.#matrix[column][y] = symbol;
 
-        this.#isOver |= this.#checkHorizontal(symbol, column, y);
-        this.#isOver |= this.#checkVertical(symbol, column, y);
-        this.#isOver |= this.#checkDiagonal1(symbol, column, y);
-        this.#isOver |= this.#checkDiagonal2(symbol, column, y);
+        const hori = this.#checkHorizontal(symbol, column, y);
+        const vert = this.#checkVertical(symbol, column, y);
+        const dia1 = this.#checkDiagonal1(symbol, column, y);
+        const dia2 = this.#checkDiagonal2(symbol, column, y);
+
+        if (hori.length === this.#winCond) {
+            this.#winningCord = hori;
+        } else if (vert.length === this.#winCond) {
+            this.#winningCord = vert;
+        } else if (dia1.length === this.#winCond) {
+            this.#winningCord = dia1;
+        } else if (dia2.length === this.#winCond) {
+            this.#winningCord = dia2;
+        }
 
         return true;
     }
 
     #checkHorizontal(symbol, x, y) {
-        let count = 0;
+        let winningCords = [];
         let from = Math.max(0, x - (this.#winCond - 1));
         const to = Math.min(this.#width - 1, x + (this.#winCond - 1));
         for (from; from <= to; from++) {
             if (this.#matrix[from][y] === symbol) {
-                count++;
-                if (count === this.#winCond) {
-                    return true;
+                winningCords.push([from, y]);
+                if (winningCords.length === this.#winCond) {
+                    return winningCords;
                 }
             } else {
-                count = 0;
+                winningCords = [];
             }
         }
-        return false;
+        return [];
     }
 
     #checkVertical(symbol, x, y) {
-        let count = 0;
+        let winningCords = [];
         let from = Math.max(0, y - (this.#winCond - 1));
         const to = Math.min(this.#height - 1, y + (this.#winCond - 1));
         for (from; from <= to; from++) {
             if (this.#matrix[x][from] === symbol) {
-                count++;
-                if (count === this.#winCond) {
-                    return true;
+                winningCords.push([x, from]);
+                if (winningCords.length === this.#winCond) {
+                    return winningCords;
                 }
             } else {
-                count = 0;
+                winningCords = [];
             }
         }
-        return false;
+        return [];
     }
 
 
     // For diagonals like /
     #checkDiagonal1(symbol, x, y) {
-        let count = 0;
+        let winningCords = [];
         let offsetFrom = -(this.#winCond - 1);
         const offsetTo = this.#winCond - 1;
         for (offsetFrom; offsetFrom <= offsetTo; offsetFrom++) {
@@ -115,20 +129,20 @@ export default class BoardLogic {
                 continue;
             }
             if (this.#matrix[x + offsetFrom][y - offsetFrom] === symbol) {
-                count++;
-                if (count === this.#winCond) {
-                    return true;
+                winningCords.push([x + offsetFrom, y - offsetFrom]);
+                if (winningCords.length === this.#winCond) {
+                    return winningCords;
                 }
             } else {
-                count = 0;
+                winningCords = []
             }
         }
-        return false;
+        return [];
     }
 
     // For diagonals like \
     #checkDiagonal2(symbol, x, y) {
-        let count = 0;
+        let winningCords = [];
         let offsetFrom = -(this.#winCond - 1);
         const offsetTo = this.#winCond - 1;
         for (offsetFrom; offsetFrom <= offsetTo; offsetFrom++) {
@@ -136,15 +150,15 @@ export default class BoardLogic {
                 continue;
             }
             if (this.#matrix[x + offsetFrom][y + offsetFrom] === symbol) {
-                count++;
-                if (count === this.#winCond) {
-                    return true;
+                winningCords.push([x + offsetFrom, y + offsetFrom]);
+                if (winningCords.length === this.#winCond) {
+                    return winningCords;
                 }
             } else {
-                count = 0;
+                winningCords = [];
             }
         }
-        return false;
+        return [];
     }
 
     #inBoard(x, y) {

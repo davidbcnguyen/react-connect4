@@ -8,13 +8,13 @@ const boardLogic = new BoardLogic(7, 6, 4);
 function Board() {
     const symbols = ["O", "X"];
     const [player, setPlayer] = useState(0);
-    const [isOver, setIsOver] = useState(false);
+    const [winningCord, setWinningCord] = useState([]);
 
     const colClickGenerator = (col) => {
         return () => {
             if (boardLogic.move(symbols[player], col)) {
                 setPlayer((player + 1) % 2);
-                setIsOver(boardLogic.isOver);
+                setWinningCord(boardLogic.winningCord);
                 return true;
             } else {
                 return false;
@@ -24,7 +24,7 @@ function Board() {
 
     const cols = [];
     for (let i = 0; i < 7; i++) {
-        cols.push(<Column key={i} currentSymbol={symbols[player]} makeMove={colClickGenerator(i)}></Column>)
+        cols.push(<Column key={i} x={i} currentSymbol={symbols[player]} winningCord={winningCord} makeMove={colClickGenerator(i)}></Column>)
     }
 
     return (
@@ -32,7 +32,7 @@ function Board() {
             <div className="board">
                 {cols}
             </div>
-            <Over isOver={isOver}></Over>
+            <Over isOver={winningCord.length >= 4}></Over>
         </div>
     )
 }

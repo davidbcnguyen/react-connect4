@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 function Column(props) {
-    const { currentSymbol, makeMove } = props;
+    const { x, currentSymbol, makeMove, winningCord } = props;
     const [col, setCol] = useState([undefined, undefined, undefined, undefined, undefined, undefined]);
 
     const clickHandler = () => {
@@ -22,7 +22,7 @@ function Column(props) {
     return (
         <div className="column" onClick={clickHandler}>
             <ul>{
-                col.map((symbol, idx) => <li key={idx}>{symbol || "_"}</li>)
+                col.map((symbol, idx) => <li key={[idx, x]} className={winningCord.filter(ele => ele[0] === x && ele[1] -1 === idx).length ? "winning" : ""} >{symbol || "_"}</li>)
             }</ul>
         </div>
     )
