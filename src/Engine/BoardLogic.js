@@ -47,6 +47,9 @@ export default class BoardLogic {
     }
 
     move(symbol, column) {
+        if (this.#isOver) {
+            return false;
+        }
         if (column < 0 || this.#width <= column) {
             return false;
         }
